@@ -90,11 +90,11 @@ def main():
 
     # get all the devices info, 500 devices collect per each API call (this is the max)
     all_devices_info = get_all_device_info(500, dnac_auth)
-    print(json.dumps(all_devices_info))
+    print(json.dumps(all_devices_info))  # save the all devices info to Splunk App index
 
     # get the overall network health
     overall_network_health = get_overall_network_health(dnac_auth)
-    print(json.dumps([{'overall_network_health': overall_network_health}]))
+    print(json.dumps([{'overall_network_health': overall_network_health}]))  # save the network health to Splunk App index
 
 
 if __name__ == '__main__':
