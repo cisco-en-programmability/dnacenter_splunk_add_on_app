@@ -16,9 +16,9 @@ urllib3.disable_warnings(InsecureRequestWarning)  # disable insecure https warni
 
 # Cisco DNA Center info
 
-username = 'username'
+username = 'user'
 password = 'password'
-DNAC_URL = 'https://ip address'
+DNAC_URL = 'https://Cisco_DNA_Center'
 
 
 DNAC_AUTH = HTTPBasicAuth(username, password)
@@ -38,18 +38,26 @@ def get_dnac_jwt_token(dnac_auth):
     return dnac_jwt_token
 
 
-def get_all_device_info(dnac_jwt_token):
+def get_all_device_info(limit, dnac_jwt_token):
     """
-    The function will return all network devices info
+    The function will return all network devices info, using the specified limit of devices/API Call
+    :param limit: the number of devices to return per API call
     :param dnac_jwt_token: Cisco DNA C token
     :return: DNA C device inventory info
     """
-    url = DNAC_URL + '/dna/intent/api/v1/network-device'
-    header = {'content-type': 'application/json', 'x-auth-token': dnac_jwt_token}
-    all_devices_response = requests.get(url, headers=header, verify=False)
-    all_devices_json = all_devices_response.json()
-    all_devices_info = all_devices_json['response']
-    return all_devices_info
+    offset = 1
+    all_devices_list = []
+    all_devices_info = ['']  # assign a value, to make sure the API call will run at least once
+    while all_devices_info:
+        all_devices_info = ''
+        url = DNAC_URL + '/dna/intent/api/v1/network-device?offset=' + str(offset) + '&limit=' + str(limit)
+        header = {'content-type': 'application/json', 'x-auth-token': dnac_jwt_token}
+        all_devices_response = requests.get(url, headers=header, verify=False)
+        all_devices_json = all_devices_response.json()
+        all_devices_info = all_devices_json['response']
+        all_devices_list += all_devices_info
+        offset += limit
+    return all_devices_list
 
 
 def get_overall_network_health(dnac_jwt_token):
@@ -80,8 +88,8 @@ def main():
     # get the Cisco DNA Center Auth
     dnac_auth = get_dnac_jwt_token(DNAC_AUTH)
 
-    # get all the devices info
-    all_devices_info = get_all_device_info(dnac_auth)
+    # get all the devices info, 500 devices collect per each API call (this is the max)
+    all_devices_info = get_all_device_info(500, dnac_auth)
     print(json.dumps(all_devices_info))
 
     # get the overall network health
