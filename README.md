@@ -25,7 +25,6 @@ The repo includes:
    - device reachability, during the past 60 minutes
    - events received from Cisco DNA Center, during the past 30 days
 
-Splunk Dashboard:
 
 
 **License**
