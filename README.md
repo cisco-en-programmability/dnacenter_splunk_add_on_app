@@ -20,8 +20,8 @@ It is recommended to have a recurring schedule for the app to collect real time 
 The repo includes:
  - dnac_rest_apis.py - code that will run on Splunk Enterprise to collect the device inventory (used for reachability
  reporting), and device health
- - dnacenter_splunk_dashbboard.xml - sample Splunk dashboard that will display real time:
-   - sumamry device health, during the past 60 minutes
+ - dnacenter_splunk_dashboard.xml - sample Splunk dashboard that will display real time:
+   - summary device health, during the past 60 minutes
    - device reachability, during the past 60 minutes
    - events received from Cisco DNA Center, during the past 30 days
 
