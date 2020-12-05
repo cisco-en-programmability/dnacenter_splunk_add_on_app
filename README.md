@@ -26,6 +26,7 @@ The repo includes:
    - events received from Cisco DNA Center, during the past 30 days
 
 Splunk Dashboard:
+!(/Cisco_DNA_Center_dashboard.png .png)
 
 
 **License**
