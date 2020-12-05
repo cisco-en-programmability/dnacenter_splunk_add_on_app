@@ -25,7 +25,8 @@ The repo includes:
    - device reachability, during the past 60 minutes
    - events received from Cisco DNA Center, during the past 30 days
 
-Splunk Dashboard: 
+
+Cisco DNA Center Splunk Dashboard: 
 
 ![Cisco DNA Center Splunk Dashboard](https://github.com/cisco-en-programmability/dnacenter_splunk_add_on_app/blob/master/Cisco_DNA_Center_dashboard.png?raw=true)
 
