@@ -44,9 +44,9 @@ urllib3.disable_warnings(InsecureRequestWarning)  # disable insecure https warni
 
 # Cisco DNA Center info
 
-username = 'user'
-password = 'password'
-DNAC_URL = 'https://Cisco DNA Center'
+username = 'Admin'
+password = 'Clive.06'
+DNAC_URL = 'https://10.93.141.35'
 
 
 DNAC_AUTH = HTTPBasicAuth(username, password)
@@ -88,6 +88,32 @@ def get_all_device_info(limit, dnac_jwt_token):
     return all_devices_list
 
 
+def get_all_device_dict(limit, dnac_jwt_token):
+    """
+    The function will return all network devices info, using the specified limit of devices/API Call
+    :param limit: the number of devices to return per API call
+    :param dnac_jwt_token: Cisco DNA C token
+    :return: DNA C device inventory info
+    """
+    offset = 1
+    all_devices_dict = {}
+    all_devices_list = []
+    all_devices_info = ['']  # assign a value, to make sure the API call will run at least once
+    while all_devices_info:
+        while all_devices_info:
+            all_devices_info = ''
+            url = DNAC_URL + '/dna/intent/api/v1/network-device?offset=' + str(offset) + '&limit=' + str(limit)
+            header = {'content-type': 'application/json', 'x-auth-token': dnac_jwt_token}
+            all_devices_response = requests.get(url, headers=header, verify=False)
+            all_devices_json = all_devices_response.json()
+            all_devices_info = all_devices_json['response']
+            all_devices_list += all_devices_info
+            offset += limit
+    for device in all_devices_list:
+        all_devices_dict.update({device['hostname']: device})
+    return all_devices_dict
+
+
 def get_overall_network_health(dnac_jwt_token):
     """
     This function will retrieve the network health at the time the function is called
@@ -99,8 +125,19 @@ def get_overall_network_health(dnac_jwt_token):
     header = {'content-type': 'application/json', 'x-auth-token': dnac_jwt_token}
     network_health_response = requests.get(url, headers=header, verify=False)
     network_health_json = network_health_response.json()
-    network_health = network_health_json['response'][0]['healthScore']
+    network_health = {'overall_network_health': network_health_json['response'][0]['healthScore']}
+    for device_group in network_health_json['healthDistirubution']:
+        network_health.update({device_group['category']: device_group['healthScore']})  # merge the device category health
     return network_health
+
+
+def pprint(json_data):
+    """
+    Pretty print JSON formatted data
+    :param json_data:
+    :return:
+    """
+    print(json.dumps(json_data, indent=4, separators=(' , ', ' : ')))
 
 
 def get_epoch_current_time():
@@ -116,13 +153,17 @@ def main():
     # get the Cisco DNA Center Auth
     dnac_auth = get_dnac_jwt_token(DNAC_AUTH)
 
-    # get all the devices info, 500 devices collect per each API call (this is the max)
-    all_devices_info = get_all_device_info(500, dnac_auth)
-    print(json.dumps(all_devices_info))  # save the all devices info to Splunk App index
+    # get all the devices info, 500 devices collect per each API call (this is the max), print them as list
+    # all_devices_info = get_all_device_info(500, dnac_auth)
+    # print(json.dumps(all_devices_info))  # save the all devices info to Splunk App index
+
+    # get all the devices info, 500 devices collect per each API call (this is the max), print them as dict
+    all_devices_info_dict = get_all_device_dict(5, dnac_auth)
+    print(json.dumps(all_devices_info_dict))  # save the all devices info to Splunk App index
 
     # get the overall network health
     overall_network_health = get_overall_network_health(dnac_auth)
-    print(json.dumps([{'overall_network_health': overall_network_health}]))  # save the network health to Splunk App index
+    print(json.dumps(overall_network_health))  # save the network health to Splunk App index
 
 
 if __name__ == '__main__':
